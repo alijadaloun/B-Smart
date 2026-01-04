@@ -90,5 +90,18 @@ export default defineConfig({
         '~': path.resolve(__dirname, './src'),
       },
     },
+    build: {
+      cssCodeSplit: true, // Enable CSS code splitting per route (Astro does this automatically)
+      cssMinify: true, // Minify CSS
+      minify: 'esbuild', // Minify JavaScript (faster than terser)
+      rollupOptions: {
+        output: {
+          manualChunks: undefined, // Let Astro handle chunking automatically
+        },
+      },
+    },
+    css: {
+      devSourcemap: false, // Disable sourcemaps in dev for faster builds
+    },
   },
 });

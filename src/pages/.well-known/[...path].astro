@@ -1,0 +1,16 @@
+---
+// Handle .well-known paths (like Chrome DevTools requests)
+// This prevents the catch-all blog routes from matching these paths
+export const prerender = false;
+
+// Return 404 for all .well-known requests
+---
+<html>
+  <head>
+    <title>404 - Not Found</title>
+  </head>
+  <body>
+    <h1>404 - Not Found</h1>
+  </body>
+</html>
+

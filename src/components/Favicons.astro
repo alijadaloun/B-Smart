@@ -1,8 +1,11 @@
 ---
-// Using LOGO.png from public folder as favicon
-const logoPath = '/LOGO.png';
+// Using LOGO.svg for favicon and LOGO.png for Apple touch icon
+const logoSvgPath = '/LOGO.svg';
+const logoPngPath = '/LOGO.png';
 ---
 
-<link rel="shortcut icon" href={logoPath} />
-<link rel="icon" type="image/png" href={logoPath} />
-<link rel="apple-touch-icon" sizes="180x180" href={logoPath} />
+<!-- Standard favicon (SVG) -->
+<link rel="icon" type="image/svg+xml" href={logoSvgPath} />
+
+<!-- Apple touch icon (PNG - Apple doesn't support SVG) -->
+<link rel="apple-touch-icon" sizes="180x180" href={logoPngPath} />

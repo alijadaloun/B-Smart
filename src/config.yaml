@@ -1,10 +1,6 @@
 site:
   name: B-Smart
-  # TODO: Replace with your GitHub Pages URL
-  # If your repo is named [username].github.io, use: 'https://[username].github.io'
-  # If your repo has a different name, use: 'https://[username].github.io/[repository-name]'
-  site: 'https://YOUR-USERNAME.github.io/YOUR-REPO-NAME'
-  # If your repo is NOT named [username].github.io, change base to: '/[repository-name]/'
+  site: 'https://bsmart.com'
   base: '/'
   trailingSlash: false
 

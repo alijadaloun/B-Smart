@@ -1,0 +1,204 @@
+---
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+import Headline from '~/components/ui/Headline.astro';
+import Button from '~/components/ui/Button.astro';
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  tagline?: string;
+  id?: string;
+  isDark?: boolean;
+  classes?: {
+    container?: string;
+  };
+  // Google Maps embed URL
+  mapEmbedUrl?: string;
+  // Google Maps directions URL (opens in new tab)
+  directionsUrl?: string;
+  // Location text to display below map
+  locationText?: string;
+}
+
+const {
+  title = 'Find Us',
+  subtitle = 'Visit B-Smart Learning Center in Jebjannine.',
+  tagline,
+  id,
+  isDark = false,
+  classes = {},
+  mapEmbedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d379.2702675800754!2d35.78241553455437!3d33.62577983028481!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f290ef10a8d19%3A0xb82961b76d0787d!2sB-Smart%20Learning%20Center!5e0!3m2!1sen!2slb!4v1767523817541!5m2!1sen!2slb',
+  directionsUrl = 'https://www.google.com/maps/dir/?api=1&destination=B-Smart+Learning+Center,+Jebjannine,+Beqaa,+Lebanon',
+  locationText = 'B-Smart Learning Center — Jebjannine, Beqaa',
+} = Astro.props;
+---
+
+<WidgetWrapper id={id} isDark={isDark} containerClass={`max-w-6xl mx-auto ${classes?.container ?? ''}`}>
+  <Headline title={title} subtitle={subtitle} tagline={tagline} />
+  
+  <!-- CTA Button Below Headline -->
+  <div class="flex justify-center mb-6 sm:mb-8">
+    <Button
+      variant="primary"
+      href={directionsUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      icon="tabler:map-pin"
+      text="Get Directions"
+    />
+  </div>
+
+  <!-- Map Container with Lazy Loading -->
+  <div class="relative w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800">
+    <!-- Skeleton/Placeholder (shown before map loads) -->
+    <div
+      id={`map-skeleton-${id || 'default'}`}
+      class="w-full h-[260px] sm:h-[320px] md:h-[360px] lg:h-[420px] bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 animate-pulse flex items-center justify-center"
+    >
+      <div class="text-center">
+        <Icon name="tabler:map-pin" class="w-12 h-12 mx-auto mb-3 text-gray-400 dark:text-slate-500" />
+        <p class="text-sm text-gray-500 dark:text-slate-400">Loading map...</p>
+      </div>
+    </div>
+
+    <!-- Map Iframe (lazy-loaded via Intersection Observer) -->
+    <iframe
+      id={`map-iframe-${id || 'default'}`}
+      src=""
+      width="100%"
+      style="border:0; display: none;"
+      allowfullscreen
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      title="B-Smart Learning Center Location Map"
+      aria-label="Interactive map showing the location of B-Smart Learning Center in Jebjannine, Beqaa, Lebanon"
+      class="w-full map-iframe-responsive"
+    ></iframe>
+
+    <!-- Fallback Link (shown if iframe fails to load) -->
+    <div
+      id={`map-fallback-${id || 'default'}`}
+      class="hidden absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-slate-800 p-6"
+    >
+      <div class="text-center">
+        <Icon name="tabler:map-pin" class="w-12 h-12 mx-auto mb-3 text-primary" />
+        <p class="text-sm text-gray-600 dark:text-slate-300 mb-4">
+          Unable to load map. Click below to view location:
+        </p>
+        <Button
+          variant="primary"
+          href={directionsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          icon="tabler:map-pin"
+          text="Open in Google Maps"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Location Text Below Map -->
+  <div class="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+    <Icon name="tabler:map-pin" class="w-4 h-4 flex-shrink-0" />
+    <span>{locationText}</span>
+  </div>
+</WidgetWrapper>
+
+<script is:inline define:vars={{ mapEmbedUrl, mapId: id || 'default' }}>
+  (function() {
+    'use strict';
+    
+    // Lazy load map using Intersection Observer
+    // This ensures the iframe only loads when the user scrolls near the map section
+    // This improves initial page load performance
+    
+    const skeletonId = `map-skeleton-${mapId}`;
+    const iframeId = `map-iframe-${mapId}`;
+    const fallbackId = `map-fallback-${mapId}`;
+    
+    const skeleton = document.getElementById(skeletonId);
+    const iframe = document.getElementById(iframeId);
+    const fallback = document.getElementById(fallbackId);
+    
+    if (!skeleton || !iframe) return;
+    
+    // Create Intersection Observer with a 200px root margin
+    // This means the map will start loading when it's 200px away from the viewport
+    // Adjust rootMargin to change when loading triggers (e.g., '100px' for earlier, '500px' for later)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Load the map
+            iframe.src = mapEmbedUrl;
+            iframe.style.display = 'block';
+            
+            // Hide skeleton after a short delay for smooth transition
+            setTimeout(() => {
+              if (skeleton) {
+                skeleton.style.display = 'none';
+              }
+            }, 300);
+            
+            // Check if iframe loaded successfully
+            iframe.addEventListener('load', function onLoad() {
+              iframe.removeEventListener('load', onLoad);
+              // Map loaded successfully
+            });
+            
+            iframe.addEventListener('error', function onError() {
+              // If iframe fails to load, show fallback
+              if (skeleton) skeleton.style.display = 'none';
+              if (iframe) iframe.style.display = 'none';
+              if (fallback) fallback.classList.remove('hidden');
+            });
+            
+            // Stop observing once loaded
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: '200px', // Start loading 200px before entering viewport
+        threshold: 0.1, // Trigger when 10% of the element is visible
+      }
+    );
+    
+    // Observe the skeleton element
+    observer.observe(skeleton);
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      observer.disconnect();
+    });
+  })();
+</script>
+
+<style>
+  /* Responsive map iframe heights - prevents layout shift */
+  /* Mobile: 260px, Small screens: 320px, Medium: 360px, Large: 420px */
+  .map-iframe-responsive {
+    height: 260px;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  @media (min-width: 640px) {
+    .map-iframe-responsive {
+      height: 320px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .map-iframe-responsive {
+      height: 360px;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .map-iframe-responsive {
+      height: 420px;
+    }
+  }
+</style>
+
