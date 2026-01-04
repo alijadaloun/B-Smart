@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://alijadaloun.github.io/B-Smart/sitemap-index.xml
